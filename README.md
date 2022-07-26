@@ -93,8 +93,8 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 | ファイル名 | 処理内容 |
 |:---:|-----|
 | knowledge.html | ロード時に非同期通信でListKnowledgeServletにGET通信し、ナレッジデータを全件取得する。 |
-| FindKnowledgeServlet.java | URLパターン：/find<br>KnowledgeDaoのfindAll()メソッドを呼び出し、ナレッジデータを全件取得する。取得したナレッジデータをJSON形式に変換し、レスポンスのボディ部に書き出す。 |
-| KnowledgeDao.java | メソッド名：findAll()<br>KNOWLEDGEテーブルのデータを全件取得する。取得したデータをListに格納し、返却する。 |
+| FindKnowledgeServlet.java | URLパターン：/find<br>HTTPメソッド：GET<br>KnowledgeDaoのfindAll()メソッドを呼び出し、ナレッジデータを全件取得する。取得したナレッジデータをJSON形式に変換し、レスポンスのボディ部に書き出す。 |
+| KnowledgeDao.java | メソッド名：findAll()<br>引数の型：なし<br>戻り値の型：Knowledgeのリスト<br>KNOWLEDGEテーブルのデータを全件取得する。取得したデータをListに格納し、返却する。 |
 
 <br>
 
@@ -107,8 +107,8 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 | ファイル名 | 処理内容 |
 |:---:|-----|
 | knowledge.html | 追加ボタン押下時に非同期通信でCreateKnowledgeServletにPOST通信し、ナレッジデータを登録する。POST通信時、入力されたカテゴリー、ナレッジをJSON形式で送る。<br>登録処理後、ナレッジを再度全件検索し、カテゴリーとナレッジの入力値をクリアする。 |
-| CreateKnowledgeServlet.java | URLパターン：/create<br>KnowledgeDaoのcreate()メソッドを呼び出し、リクエスト情報（カテゴリー、ナレッジ）を基にナレッジデータを登録する。 |
-| KnowledgeDao.java | メソッド名：create()<br>KNOWLEDGEテーブルにデータを登録する。 |
+| CreateKnowledgeServlet.java | URLパターン：/create<br>HTTPメソッド：POST<br>KnowledgeDaoのcreate()メソッドを呼び出し、リクエスト情報（カテゴリー、ナレッジ）を基にナレッジデータを登録する。 |
+| KnowledgeDao.java | メソッド名：create()<br>引数の型：Knowledge<br>戻り値の型：なし<br>KNOWLEDGEテーブルにデータを登録する。 |
 
 <br>
 
@@ -121,8 +121,8 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 | ファイル名 | 処理内容 |
 |:---:|-----|
 | knowledge.html | 削除ボタン押下時に非同期通信でDeleteKnowledgeServletにPOST通信し、ナレッジデータを削除する。POST通信時、削除対象ナレッジのIDをJSON形式で送る。<br>削除処理後、ナレッジを再度全件検索する。 |
-| DeleteKnowledgeServlet.java | URLパターン：/delete<br>KnowledgeDaoのdelete()メソッドを呼び出し、対象のナレッジデータを削除する。 |
-| KnowledgeDao.java | メソッド名：delete()<br>KNOWLEDGEテーブルから対象データを削除する。 |
+| DeleteKnowledgeServlet.java | URLパターン：/delete<br>HTTPメソッド：POST<br>KnowledgeDaoのdelete()メソッドを呼び出し、対象のナレッジデータを削除する。 |
+| KnowledgeDao.java | メソッド名：delete()<br>引数の型：int<br>戻り値の型：なし<br>KNOWLEDGEテーブルから引数IDのデータを削除する。 |
 
 <br><br>
 
@@ -209,3 +209,51 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 - index.htmlを修正する。
     - ロードバランサー経由でアプリケーション層にアクセスする。
     - 正常にナレッジシステムが動作することを確認する。
+
+<br>
+
+## 5. Lambda用アプリケーションの開発
+
+- アプリケーション層（Java）
+    - Eclipse上にknowledge-lambdaプロジェクトを作成する。
+        - Mavenプロジェクト
+        - Create a simple project
+        - Group Id：jp.knowledge
+        - Artifact Id：knowledge-lambda
+        - Packaging：jar
+    - 以下の仕様で部分一致検索をする機能を実装する。
+
+        | パッケージ名.クラス名 | 処理 |
+        |---|---|
+        | jp.knowledge.api.SearchKnowledge | Inputの型：Map<String, String><br>Outputの型：List\<Knowledge\><br>リクエスト情報（検索キーワード）を基にナレッジの部分一致検索をする。取得したデータをリストに格納し、返却する。 |
+        | jp.knowledge.dto.KnowledgeDao | メソッド名：findLikeKeyword()<br>KNOWLEDGEテーブルから引数のキーワードでナレッジの部分一致検索をし、紐付くナレッジデータを取得する。 |
+    - 正常に動作することを確認したら、AWS Lambdaにアップロードする。
+        - 関数名：自分の番号_FindKnowledgeByKeyword
+        - knowledge-lambda.jarをアップロードする。
+        - JSONで任意のIDを指定しテストする。指定したキーワードに部分一致するナレッジデータを返ってくることを確認する。
+    - Lambda関数「自分の番号_FindEmployee」のトリガーとなるAPI Gatewayを作成する。
+        - API name：自分の番号_FindKnowledgeByKeyword-API
+        - メソッド：GET
+            - クエリパラメータを送信できるように設定する。
+
+<br>
+
+- プレゼンテーション層（knowledge.html）
+    - 「ナレッジ一覧」のタイトル部分の下に以下のコードを追記する。
+        ```html
+        (中略)
+        <div class="my-3 ml-2 text-info">
+          <h3>ナレッジ一覧</h3>
+        </div>
+
+        <!-- 下記コードを追加 -->
+        <div>
+          <form class="form-group form-inline">
+            <input type="text" class="form-control" id="keyword" placeholder="検索キーワード">
+            <button type="button" class="btn btn-secondary">検索</button>
+          </form>
+        </div>
+        (中略)
+        ```
+    - 削除ボタン押下時に非同期通信でAPI GatewayのエンドポイントにGET通信し、ナレッジデータを取得する。GET通信時、検索キーワードをクエリパラメータで送る。
+検索後、ナレッジ一覧（id=knowledgesの要素の中身）をクリアし、取得したナレッジid=knowledgesの要素に追加する。
