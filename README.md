@@ -106,7 +106,7 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 
 | ファイル名 | 処理内容 |
 |:---:|-----|
-| knowledge.html | 追加ボタン押下時に非同期通信でCreateKnowledgeServletにPOST通信し、ナレッジデータを登録する。POST通信時、入力されたカテゴリー、ナレッジをJSON形式で送る。<br>登録処理後、ナレッジを再度全件検索し、カテゴリーとナレッジの入力値をクリアする。 |
+| knowledge.html | 追加ボタン押下時に非同期通信でCreateKnowledgeServletにPOST通信し、ナレッジデータを登録する。POST通信時、入力されたカテゴリー、ナレッジをURLSearchParamsオブジェクトで送る。<br>登録処理後、ナレッジを再度全件検索し、カテゴリーとナレッジの入力値をクリアする。 |
 | CreateKnowledgeServlet.java | URLパターン：/create<br>HTTPメソッド：POST<br>KnowledgeDaoのcreate()メソッドを呼び出し、リクエスト情報（カテゴリー、ナレッジ）を基にナレッジデータを登録する。 |
 | KnowledgeDao.java | メソッド名：create()<br>引数の型：Knowledge<br>戻り値の型：なし<br>KNOWLEDGEテーブルにデータを登録する。 |
 
@@ -120,7 +120,7 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
 
 | ファイル名 | 処理内容 |
 |:---:|-----|
-| knowledge.html | 削除ボタン押下時に非同期通信でDeleteKnowledgeServletにPOST通信し、ナレッジデータを削除する。POST通信時、削除対象ナレッジのIDをJSON形式で送る。<br>削除処理後、ナレッジを再度全件検索する。 |
+| knowledge.html | 削除ボタン押下時に非同期通信でDeleteKnowledgeServletにPOST通信し、ナレッジデータを削除する。POST通信時、削除対象ナレッジのIDをURLSearchParamsオブジェクトで送る。<br>削除処理後、ナレッジを再度全件検索する。 |
 | DeleteKnowledgeServlet.java | URLパターン：/delete<br>HTTPメソッド：POST<br>KnowledgeDaoのdelete()メソッドを呼び出し、対象のナレッジデータを削除する。 |
 | KnowledgeDao.java | メソッド名：delete()<br>引数の型：int<br>戻り値の型：なし<br>KNOWLEDGEテーブルから引数IDのデータを削除する。 |
 
@@ -226,7 +226,7 @@ INSERT INTO KNOWLEDGE (CATEGORY, KNOWLEDGE) VALUES ('AWS', 'AWS（Amazon Web Ser
         | パッケージ名.クラス名 | 処理 |
         |---|---|
         | jp.knowledge.api.SearchKnowledge | Inputの型：Map<String, String><br>Outputの型：List\<Knowledge\><br>リクエスト情報（検索キーワード）を基にナレッジの部分一致検索をする。取得したデータをリストに格納し、返却する。 |
-        | jp.knowledge.dto.KnowledgeDao | メソッド名：findLikeKeyword()<br>KNOWLEDGEテーブルから引数のキーワードでナレッジの部分一致検索をし、紐付くナレッジデータを取得する。 |
+        | jp.knowledge.dao.KnowledgeDao | メソッド名：findLikeKeyword()<br>KNOWLEDGEテーブルから引数のキーワードでナレッジの部分一致検索をし、紐付くナレッジデータを取得する。 |
     - 正常に動作することを確認したら、AWS Lambdaにアップロードする。
         - 関数名：自分の番号_FindKnowledgeByKeyword
         - knowledge-lambda.jarをアップロードする。
